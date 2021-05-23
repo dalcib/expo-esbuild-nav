@@ -1,0 +1,12 @@
+diff --git a/node_modules/@react-navigation/stack/lib/module/views/GestureHandlerNative.js b/node_modules/@react-navigation/stack/lib/module/views/GestureHandlerNative.js
+index 4d3e0a6..c05468d 100644
+--- a/node_modules/@react-navigation/stack/lib/module/views/GestureHandlerNative.js
++++ b/node_modules/@react-navigation/stack/lib/module/views/GestureHandlerNative.js
+@@ -11,5 +11,5 @@ export function PanGestureHandler(props) {
+     ref: gestureRef
+   })));
+ }
+-export { GestureHandlerRootView, State as GestureState, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
++export { GestureHandlerRootView, State as GestureState/* , PanGestureHandlerGestureEvent  */} from 'react-native-gesture-handler';
+ //# sourceMappingURL=GestureHandlerNative.js.map
+\ No newline at end of file
