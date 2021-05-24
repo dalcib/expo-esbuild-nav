@@ -9,7 +9,7 @@ var flowRemoveTypes = require('flow-remove-types')
 
 let cache = new Map()
 let updateCache = false
-const cacheFile = './react-native-removed-flow.json'
+const cacheFile = './.cache-removed-flow.json'
 if (fs.existsSync(cacheFile)) cache = new Map(JSON.parse(fs.readFileSync(cacheFile).toString()))
 const packagesRemoveFlow = ((modules) =>
   new RegExp(modules.map((module) => `node_modules[/|\\\\]${module}.*\\.jsx?$`).join('|'), 'g'))([
@@ -127,47 +127,44 @@ function logger(result, error) {
   if (updateCache) fs.writeFileSync(cacheFile, JSON.stringify([...cache.entries()]))
 }
 
-false &&
-  esbuild
-    .build({
-      stdin: {
-        contents: stdinContent,
-        resolveDir: '.',
-        sourcefile: 'index.bundle',
-        loader: 'js',
+esbuild
+  .build({
+    stdin: {
+      contents: stdinContent,
+      resolveDir: '.',
+      sourcefile: 'node_modules%5Cexpo%5CAppEntry.bundle',
+      loader: 'js',
+    },
+    outfile: 'node_modules%5Cexpo%5CAppEntry.bundle',
+    write: false,
+    allowOverwrite: true,
+    bundle: true,
+    minify: false,
+    sourcemap: true,
+    assetNames: 'assets/[name]',
+    publicPath: '/',
+    incremental: true,
+    resolveExtensions : [`.${platform}.tsx`, `.${platform}.ts`, `.${platform}.jsx`, `.${platform}.js`, ...extensions], //prettier-ignore
+    plugins: [rnRemovedFlowPlugin, assetsPlugin],
+    loader: { ...assetLoaders, '.js': 'jsx' },
+    banner: { js: banner },
+    watch: {
+      onRebuild(error, result) {
+        logger(result, error)
       },
-      outfile: '/index.bundle',
-      write: false,
-      allowOverwrite: true,
-      bundle: true,
-      minify: false,
-      sourcemap: true,
-      assetNames: 'assets/[name]',
-      publicPath: '/',
-      incremental: true,
-      resolveExtensions : [`.${platform}.tsx`, `.${platform}.ts`, `.${platform}.jsx`, `.${platform}.js`, ...extensions], //prettier-ignore
-      plugins: [rnRemovedFlowPlugin, assetsPlugin],
-      loader: { ...assetLoaders, '.js': 'jsx' },
-      banner: { js: banner },
-      watch: {
-        onRebuild(error, result) {
-          logger(result, error)
-        },
-      },
-    })
-    .then((result, error) => {
-      logger(result, error)
-    })
-    .catch((err) => {
-      console.error(err?.message)
-      process.exit(1)
-    })
+    },
+  })
+  .then((result, error) => {
+    logger(result, error)
+  })
+  .catch((err) => {
+    console.error(err?.message)
+    process.exit(1)
+  })
 
 const esbuildMiddleware = (metroMiddleware, server) => {
   return (req, res, next) => {
-    console.log(req.url, '.....')
-    return metroMiddleware(req, res, next)
-    /*     const url = req.url.replace('index.map', 'index.bundle.map')
+    const url = req.url.replace('index.map', 'index.bundle.map')
     const file = files.outputFiles?.filter((v) => v.relativePath === url.split('?')[0])[0]
     console.log(url, '.....')
     if (file && file.relativePath) {
@@ -179,7 +176,7 @@ const esbuildMiddleware = (metroMiddleware, server) => {
       res.end(null)
     } else {
       return metroMiddleware(req, res, next)
-    } */
+    }
   }
 }
 
